@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use feature 'say';
-use File::Copy::Recursive 'rmove';
+use File::Copy::Recursive qw/fmove rmove/;
 
 my $iter;
 my $fmt;
@@ -103,9 +103,11 @@ sub main {
                             my $new = $source;
                             $new =~ s/$before/$_/;
                             if ($fmt eq 'file'){
-                                rmove($source, $new) or die $!;
+                                next unless (-f $source);
+                                fmove($source, $new) or die $!;
                             }
                             elsif ($fmt eq 'dir'){
+                                next unless (-d $source);
                                 rmove($source, $new) or die $!;
                             }
                         }
@@ -138,7 +140,6 @@ sub main {
 sub iter {
     my $fmt = shift;
     (@file, @dir, @other) = '';
-    my $mv = '';
     opendir (my $iter, $dir) or die;
         for (readdir $iter) {
             next if ($_ =~ /\A\./);
